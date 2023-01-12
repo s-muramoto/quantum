@@ -8,7 +8,6 @@ $ python3 sample.py
 
 # 実行結果例
 <pre>
-PS D:\Users\1134142004391\Documents\ICF_AutoCapsule_disabled\work\quantum\anneal> python .\sample.py
 annealing_time =  0.0001553678512573242 [sec]
 success_rate =  69 %
 TTS =  0.0006109168317602151 [sec]
