@@ -25,14 +25,19 @@ def create_qubo():
 
     # 制約: 隙間時間は、45分までとする
     sukima_jikan = 45
-    a = Binary("anime")          # 30分
-    b = Binary("youtube")   # 5分
-    c = Binary("amazon prime")   # 4分
-    d = Binary("netflix")   # 3分
-    e = Binary("dorama")          # 60分
+    anime = Binary("anime")          # 30分
+    youtube = Binary("youtube")   # 5分
+    amazon = Binary("amazon")   # 4分
+    netfilx = Binary("netflix")   # 3分
+    dorama = Binary("dorama")          # 60分
 
     # 制約条件を満たす時に、式の結果が最小値の結果となるようにする
-    hamiltonian = Placeholder("sukima1")*(sukima_jikan - a*30 - b*5 - c*4 - d*3 - e*60)**2
+    anime_time = 30
+    youtube_time = 5
+    amazon_time = 4
+    netfilx_time = 3
+    dorama_time = 60
+    hamiltonian = Placeholder("sukima1")*(sukima_jikan - anime*anime_time - youtube*youtube_time - amazon*amazon_time - netfilx*netfilx_time - dorama*dorama_time)**2
     model = hamiltonian.compile()
     feed_dict = {"sukima1": 1.0}
     qubo, offset = model.to_qubo(feed_dict=feed_dict)
@@ -57,7 +62,7 @@ def check_sukima(result):
 
     valid = 0
     for s,e,o in result.data(['sample', 'energy', 'num_occurrences']):
-        if s['anime'] == 1 and s['youtube'] == 1 and s['amazon prime'] == 1 and s['netflix'] == 1 :
+        if s['anime'] == 1 and s['youtube'] == 1 and s['amazon'] == 1 and s['netflix'] == 1 :
             valid += 1
     
     return valid
