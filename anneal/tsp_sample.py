@@ -4,6 +4,7 @@ from neal import SimulatedAnnealingSampler
 
 '''
 巡回セールスマン問題を解く量子アニーリング サンプルコード
+経路最適化
 
 i / j   都市A   都市B   都市C   都市D  都市E
 都市A   -       20      20      50     40
@@ -38,12 +39,12 @@ for t in range(N):
 # 制約条件1 (各都市は1回は訪問すること) ソース先頭の表の行のビット合計が1のとき、式が最小
 H_const1 = 0
 for i in range(N):
-    H_const1 += (np.sum((x[i])) - 1)**2
+    H_const1 += (np.sum(x[i]) - 1)**2
 
 # 制約条件2 (1度に訪れる都市は1つであること)　ソース先頭の表の列のビット合計が1のとき、式が最小
 H_const2 = 0
 for i in range(N):
-    H_const2 += (np.sum(x.T[i])-1)**2
+    H_const2 += (np.sum(x.T[i]) - 1)**2
 
 H = H_cost + Placeholder("weight_const1")*Constraint(H_const1, label="H_const1") + \
     Placeholder("weight_const2")*Constraint(H_const2, label="H_const2")
@@ -54,29 +55,27 @@ feed_dict = {"weight_const1": 1000.0, "weight_const2": 1000.0}
 qubo, offset = model.to_qubo(feed_dict=feed_dict)
 
 # Dwaveで疑似アニーリング
-trials = 100  # 試行回数
-num_sweeps = 1000
-beta_min = 4.260277692439737e-05  # default
-beta_max = 1.5201804919084165  # default
+num_reads = 20
+num_sweeps = 20000
 sampler = SimulatedAnnealingSampler()
 result = sampler.sample_qubo(
-    qubo, num_reads=1, num_sweeps=num_sweeps)
+    qubo, num_reads=num_reads, num_sweeps=num_sweeps)
 
+# 結果の加工
 best_length = 90
-for i in range(trials):
+valid = 0
+for s, e, o in result.data(['sample', 'energy', 'num_occurrences']):
     length = 0
-    valid = 0
-    for s, e, o in result.data(['sample', 'energy', 'num_occurrences']):
-        for i in range(N):
-            for j in range(N):
-                spin_index = "x[" + str(i) + "][" + str(j) + "]"
-                spin = s[spin_index]
-                if i != j and spin == 1:
-                    length += Q[i][j]
-                    print("Length: ", length)
+    for i in range(N):
+        for j in range(N):
+            spin_index = "x[" + str(i) + "][" + str(j) + "]"
+            spin = s[spin_index]
+            if i != j and spin == 1:
+                length += Q[i][j]
 
-                # 最適解と求解の比較
-                if best_length == length:
-                    valid += 1
+    print("Length: ", length)
+    # 最適解と求解の比較
+    if best_length == length:
+        valid += 1
 
-print("Success count: ", valid, "/", trials)
+print("Success count: ", valid, "/", num_reads)
