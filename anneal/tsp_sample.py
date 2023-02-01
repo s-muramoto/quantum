@@ -55,8 +55,8 @@ feed_dict = {"weight_const1": 1000.0, "weight_const2": 1000.0}
 qubo, offset = model.to_qubo(feed_dict=feed_dict)
 
 # Dwaveで疑似アニーリング
-num_reads = 20
-num_sweeps = 20000
+num_reads = 100
+num_sweeps = 50000
 sampler = SimulatedAnnealingSampler()
 result = sampler.sample_qubo(
     qubo, num_reads=num_reads, num_sweeps=num_sweeps)
